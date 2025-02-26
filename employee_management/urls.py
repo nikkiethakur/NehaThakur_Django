@@ -32,3 +32,4 @@ urlpatterns = [
     path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
     path('api/dashboard/', DashboardView.as_view(), name='dashboard'),
 ]
+
