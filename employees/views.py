@@ -29,10 +29,12 @@ class LoginView(GenericAPIView):
         if user is not None:
             refresh = RefreshToken.for_user(user)
             user_serializer = UserSerializer(user)
+            data = User.objects.all()
+            detials = UserSerializer(data, many = True)
             return Response({
                 'refresh': str(refresh),
                 'access': str(refresh.access_token),
-                'user': user_serializer.data
+                'user': detials.data
             })
         else:
             return Response({'detail': 'Invalid credentials'}, status=401)
