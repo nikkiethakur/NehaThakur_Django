@@ -1,17 +1,37 @@
-from django.shortcuts import render
+from django.shortcuts import render,HttpResponse
 from rest_framework.generics import CreateAPIView, GenericAPIView
 from rest_framework.response import Response
+from .models import User, Employee
 from rest_framework.views import APIView
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework_simplejwt.tokens import RefreshToken
-from rest_framework.permissions import AllowAny
-from django.contrib.auth.models import User
 from django.contrib.auth import authenticate
-from .serializers import RegisterSerializer, LoginSerializer, UserSerializer
-from rest_framework import status
-
+from django.contrib.auth import get_user_model
+from .serializers import RegisterSerializer, LoginSerializer, UserSerializer, DepartmentSerializer, DesignationSerializer
  
 # Create your views here.
+
+class DetailsViews(APIView):
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
+    def get(self, request):
+        data = User.objects.all()
+        details_serializer = UserSerializer(data , many = True)
+        return Response(details_serializer.data)
+    
+class designationViews(APIView):
+    def get(self, request):
+        all_data = Employee.objects.all()
+        designation_detail_serializer = DesignationSerializer(all_data , many=True)
+        return Response(designation_detail_serializer.data)
+    
+class departmentViews(APIView):
+    def get(self, request):
+        all_data = Employee.objects.all()
+        department_detail_serializer = DepartmentSerializer(all_data , many=True)
+        return Response(department_detail_serializer.data)
+    
 class RegisterView(CreateAPIView):
     queryset = User.objects.all()
     permission_classes = (AllowAny,)
@@ -22,30 +42,19 @@ class LoginView(GenericAPIView):
     serializer_class = LoginSerializer
 
     def post(self, request, *args, **kwargs):
-        username = request.data.get('username')
+        email = request.data.get('email')
         password = request.data.get('password')
-        user = authenticate(username=username, password = password)
+        user = authenticate(email= email , password = password)
 
         if user is not None:
             refresh = RefreshToken.for_user(user)
             user_serializer = UserSerializer(user)
-            data = User.objects.all()
-            detials = UserSerializer(data, many = True)
+            user = authenticate(email= email , password = password)
             return Response({
                 'refresh': str(refresh),
                 'access': str(refresh.access_token),
-                'user': detials.data
+                'user': user_serializer.data
             })
         else:
             return Response({'detail': 'Invalid credentials'}, status=401)
         
-
-class DashboardView(APIView):
-    permission_classes = (IsAuthenticated,)
-    def get(self, request):
-        user = request.user
-        user_serializer = UserSerializer(user)
-        return Response({
-            'message': 'Welcome to Dashboard',
-            'user': user_serializer.data
-        }, 200)

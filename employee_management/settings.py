@@ -52,14 +52,20 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
+ROOT_URLCONF = 'employee_management.urls'
+
+
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework_simplejwt.authentication.JWTAuthentication',
-    )
+    ),
+    'DEFAULT_PERMISSION_CLASSES': [
+            'rest_framework.permissions.AllowAny',
+    ]
 }
 
+AUTH_USER_MODEL = "employees.User"
 
-ROOT_URLCONF = 'employee_management.urls'
 
 TEMPLATES = [
     {
@@ -89,7 +95,8 @@ DATABASES = {
         "NAME": "postgres",
         "USER": "postgres",
         "PASSWORD": "employee",
-        "HOST": "host.docker.internal",
+        # "HOST": "host.docker.internal",
+        "HOST": "localhost",
         "PORT":'5432',
     }
 }
